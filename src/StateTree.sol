@@ -8,8 +8,8 @@ uint256 constant SIZE = (2**DEPTH)-1;
 
 library StateTree {
     function bitmap(uint256 index) internal pure returns (uint256) {
-        uint8 bytePos = (uint8(BUFFER_LENGTH) - 1) - (uint8(index) / DEPTH);
-        return bytePos + 1 << (uint8(index) % DEPTH);
+        uint256 bytePos = (BUFFER_LENGTH - 1) - (index / DEPTH);
+        return bytePos + 1 << (index % DEPTH);
     }
 
     function empty() internal pure returns (bytes32) {
