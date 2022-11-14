@@ -57,6 +57,7 @@ library StateTree {
     ) internal pure returns (bytes32) {
         require(_index < SIZE, "_index bigger than tree size");
         require(_proofs.length <= DEPTH, "Invalid _proofs length");
+        // todo awaiting testing
         bytes32 proofElement;
         for (uint256 d = 0; d < DEPTH; d++) {
             if ((_bits & 1) == 1) {
