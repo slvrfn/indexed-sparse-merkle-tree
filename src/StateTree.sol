@@ -2,14 +2,14 @@
 // Copyright (c) Tim Daubenschütz.
 pragma solidity ^0.8.6;
 
-uint256 constant SIZE = 255;
 uint256 constant BUFFER_LENGTH = 1;
 uint256 constant DEPTH = 8;
+uint256 constant SIZE = (2**DEPTH)-1;
 
 library StateTree {
-    function bitmap(uint256 index) internal pure returns (uint8) {
-        uint8 bytePos = (uint8(BUFFER_LENGTH) - 1) - (uint8(index) / 8);
-        return bytePos + 1 << (uint8(index) % 8);
+    function bitmap(uint256 index) internal pure returns (uint256) {
+        uint8 bytePos = (uint8(BUFFER_LENGTH) - 1) - (uint8(index) / DEPTH);
+        return bytePos + 1 << (uint8(index) % DEPTH);
     }
 
     function empty() internal pure returns (bytes32) {
@@ -18,7 +18,7 @@ library StateTree {
 
 	function validate(
 		bytes32[] memory _proofs,
-        uint8 _bits,
+        uint256 _bits,
       	uint256 _index,
       	bytes32 _leaf,
 	 	bytes32 _expectedRoot
@@ -28,7 +28,7 @@ library StateTree {
 
 	function write(
 		bytes32[] memory _proofs,
-        uint8 _bits,
+        uint256 _bits,
       	uint256 _index,
 	 	bytes32 _nextLeaf,
       	bytes32 _prevLeaf,
@@ -51,13 +51,12 @@ library StateTree {
 
 	function compute(
       bytes32[] memory _proofs,
-      uint8 _bits,
+      uint256 _bits,
       uint256 _index,
       bytes32 _leaf
     ) internal pure returns (bytes32) {
         require(_index < SIZE, "_index bigger than tree size");
         require(_proofs.length <= DEPTH, "Invalid _proofs length");
-        // todo awaiting testing
         bytes32 proofElement;
         for (uint256 d = 0; d < DEPTH; d++) {
             if ((_bits & 1) == 1) {
