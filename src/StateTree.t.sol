@@ -151,8 +151,8 @@ contract StateTreeTest is DSTest {
         fillUpTreeAtDepth(10);
 	}
 
-	function testFillUpTree12() public pure {
-        fillUpTreeAtDepth(12);
+	function testFillUpTree4() public pure {
+        fillUpTreeAtDepth(4);
 	}
 
 	function fillUpTreeAtDepth(uint256 depth) public pure {
