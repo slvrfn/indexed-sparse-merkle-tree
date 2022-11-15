@@ -3,13 +3,11 @@
 pragma solidity ^0.8.6;
 
 uint256 constant BUFFER_LENGTH = 1;
-uint256 constant DEPTH = 8;
-uint256 constant SIZE = (2**DEPTH)-1;
 
 library StateTree {
-    function bitmap(uint256 index) internal pure returns (uint256) {
-        uint256 bytePos = (BUFFER_LENGTH - 1) - (index / DEPTH);
-        return bytePos + 1 << (index % DEPTH);
+    function bitmap(uint256 index, uint256 depth) internal pure returns (uint256) {
+        uint256 bytePos = (BUFFER_LENGTH - 1) - (index / depth);
+        return bytePos + 1 << (index % depth);
     }
 
     function empty() internal pure returns (bytes32) {
@@ -21,9 +19,10 @@ library StateTree {
         uint256 _bits,
       	uint256 _index,
       	bytes32 _leaf,
-	 	bytes32 _expectedRoot
+	 	bytes32 _expectedRoot,
+      	uint256 _depth
 	) internal pure returns (bool) {
-		return (compute(_proofs, _bits, _index, _leaf) == _expectedRoot);
+		return (compute(_proofs, _bits, _index, _leaf, _depth) == _expectedRoot);
 	}
 
 	function write(
@@ -32,13 +31,14 @@ library StateTree {
       	uint256 _index,
 	 	bytes32 _nextLeaf,
       	bytes32 _prevLeaf,
-		bytes32 _prevRoot
+		bytes32 _prevRoot,
+      	uint256 _depth
 	) internal pure returns (bytes32) {
 		require(
-			validate(_proofs, _bits, _index, _prevLeaf, _prevRoot),
+			validate(_proofs, _bits, _index, _prevLeaf, _prevRoot, _depth),
 		  	"update proof not valid"
 		);
-		return compute(_proofs, _bits, _index, _nextLeaf);
+		return compute(_proofs, _bits, _index, _nextLeaf, _depth);
 	}
 
     function hash(bytes32 a, bytes32 b) internal pure returns (bytes32) {
@@ -53,12 +53,13 @@ library StateTree {
       bytes32[] memory _proofs,
       uint256 _bits,
       uint256 _index,
-      bytes32 _leaf
+      bytes32 _leaf,
+      uint256 _depth
     ) internal pure returns (bytes32) {
-        require(_index < SIZE, "_index bigger than tree size");
-        require(_proofs.length <= DEPTH, "Invalid _proofs length");
+        require(_index < (2**_depth)-1, "_index bigger than tree size");
+        require(_proofs.length <= _depth, "Invalid _proofs length");
         bytes32 proofElement;
-        for (uint256 d = 0; d < DEPTH; d++) {
+        for (uint256 d = 0; d < _depth; d++) {
             if ((_bits & 1) == 1) {
                 proofElement = _proofs[d];
             } else {
