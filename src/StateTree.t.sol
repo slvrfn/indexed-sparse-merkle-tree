@@ -12,8 +12,8 @@ contract StateTreeTest is DSTest {
 
     function testBitwiseProofBitGeneration() public {
         // eval pos 0
-        uint256 value = StateTree.bitmap(0);
-        value += StateTree.bitmap(4);
+        uint256 value = StateTree.bitmap(0, DEPTH);
+        value += StateTree.bitmap(4, DEPTH);
         assertEq(value % 2, 1);
 
         // eval pos 1
@@ -137,7 +137,7 @@ contract StateTreeTest is DSTest {
 		bytes32 ROOT1 = StateTree.empty();
 		bytes32 ROOT2 = StateTree.write(proofs, 0, 0, NEXT_LEAF_HASH, 0, ROOT1, DEPTH);
 
-        uint256 bits = StateTree.bitmap(0);
+        uint256 bits = StateTree.bitmap(0, DEPTH);
 		bytes32[] memory proofs1 = new bytes32[](1);
         proofs1[0] = NEXT_LEAF_HASH;
 		StateTree.write(proofs1, bits, 1, NEXT_LEAF_HASH, 0, ROOT2, DEPTH);
@@ -176,7 +176,7 @@ contract StateTreeTest is DSTest {
                 if(pointer % 2 == 0) {
                     //proofs[j] = zeros[j];
                 } else {
-                	bits += StateTree.bitmap(j);
+                	bits += StateTree.bitmap(j, depth);
                     proofs[j] = ones[j];
                 }
                 pointer = pointer / 2;
@@ -189,7 +189,7 @@ contract StateTreeTest is DSTest {
 
     function testFailHijackingHash() public {
 		bytes32[] memory proofs = new bytes32[](0);
-        uint256 bits = StateTree.bitmap(0);
+        uint256 bits = StateTree.bitmap(0, DEPTH);
 
 	    bytes32 LEAF = 0x0000000000000000000000000000000000000000000000000000000000001337;
 		bytes32 LEAF_HASH = keccak256(abi.encode(LEAF));
@@ -207,14 +207,14 @@ contract StateTreeTest is DSTest {
 		bytes32 ROOT1 = StateTree.empty();
 		bytes32 ROOT2 = StateTree.write(proofs, 0, 0, NEXT_LEAF_HASH, 0, ROOT1, DEPTH);
 
-        uint256 bits = StateTree.bitmap(0);
+        uint256 bits = StateTree.bitmap(0, DEPTH);
 		bytes32[] memory proofs1 = new bytes32[](1);
         proofs1[0] = NEXT_LEAF_HASH;
 		bytes32 ROOT3 = StateTree.write(proofs1, bits, 1, NEXT_LEAF_HASH, 0, ROOT2, DEPTH);
 
 		bytes32 UPDATE_LEAF = 0x0000000000000000000000000000000000000000000000000000000000000002;
 		bytes32 UPDATE_LEAF_HASH = keccak256(abi.encode(UPDATE_LEAF));
-        uint256 bits2 = StateTree.bitmap(0);
+        uint256 bits2 = StateTree.bitmap(0, DEPTH);
 		bytes32[] memory proofs2 = new bytes32[](1);
         proofs2[0] = NEXT_LEAF_HASH;
 		StateTree.write(proofs2, bits2, 0, UPDATE_LEAF_HASH, proofs2[0], ROOT3, DEPTH);
